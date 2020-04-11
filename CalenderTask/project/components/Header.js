@@ -40,7 +40,7 @@ class Header extends Component {
     this.setState({isCalendar:!isCalendar})
   }
   render() {
-    const {ShowBackArrow, isWeekShow, isToggle,Navigation,Headertext,heightPerc } = this.props;
+    const {ShowBackArrow, isWeekShow, isToggle,Navigation,Headertext,PlusOnPress,isSearchVisible,isAddButtonVisible } = this.props;
     const HeaderValue=Months[Headertext];
     const {isCalendar} = this.state;
     return (
@@ -87,22 +87,25 @@ class Header extends Component {
                 />
               </TouchableOpacity>
             )}
-            <TouchableOpacity>
+{ isSearchVisible?          
+           <TouchableOpacity>
               <AntDesign
                 name="search1"
                 color={orange}
                 size={30}
                 style={Styles.BackArrow}
               />
-            </TouchableOpacity>
-            <TouchableOpacity>
+            </TouchableOpacity>:null
+              }
+{ isAddButtonVisible?              
+            <TouchableOpacity  onPress={() =>{PlusOnPress()}} >
               <AntDesign
                 name="plus"
                 color={orange}
                 size={30}
                 style={Styles.AddStyle}
               />
-            </TouchableOpacity>
+            </TouchableOpacity>:null}
           </View>
         </View>
         {isWeekShow?

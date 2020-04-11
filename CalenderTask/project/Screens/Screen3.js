@@ -9,19 +9,24 @@ class Screen3 extends Component {
     super(props);
     this.state = {
       MonthValue: this.props.route.params.SelectedDay.month,
+      ClickedModalPlus:false
     };
     this.handleHeaderValueChangte = this.handleHeaderValueChangte.bind(this);
+    this.handlePlusClick = this.handlePlusClick.bind(this);
   }
 
   handleHeaderValueChangte = Num => {
     this.setState({MonthValue: Num});
   };
+  handlePlusClick=()=>{
+    this.setState({ClickedModalPlus:!this.state.ClickedModalPlus})
+  }
 
   render() {
     const {SelectedDay} = this.props.route.params;
     // console.log('Month Value', this.state.MonthValue);
     // SelectedDay={year: 2020, month: 4, day: 8, timestamp: 1586304000000, dateString: "2020-04-08"}
-    console.log(SelectedDay);
+    // console.log(SelectedDay);
     return (
       <View>
         <Header
@@ -29,7 +34,10 @@ class Screen3 extends Component {
           Navigation={this.props.navigation}
           Headertext={this.state.MonthValue || SelectedDay.day}
           isWeekShow={false}
+          isAddButtonVisible={true}
           heightPerc={0.2}
+
+          PlusOnPress={this.handlePlusClick}
           // Children={<DaysList
           //   SelectedDate={SelectedDay}
           //   MonthValue={(Num)=>{this.setState({MonthValue:Num})}}
@@ -53,6 +61,8 @@ class Screen3 extends Component {
           <DaysList
             SelectedDate={SelectedDay}
             MonthValue={this.handleHeaderValueChangte}
+            ModelState={this.state.ClickedModalPlus}
+            onPressGet={this.handlePlusClick}
           />
         </View>
       </View>
