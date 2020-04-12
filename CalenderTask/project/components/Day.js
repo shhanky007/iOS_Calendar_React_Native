@@ -12,35 +12,11 @@ import {
   TextInput,
 } from 'react-native';
 
-import HandleDayView from './HandleDayView';
-import {weekdays} from 'moment';
+import {constant} from '../DataManager/DataModals'
+const {months,nDays,weekDays}=constant;
 const {height, width} = Dimensions.get('window');
 
 class CalenderStrip extends React.Component {
-  months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  weekDays = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednessday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-  nDays = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   constructor(props) {
     super(props);
     this.state = {
@@ -52,6 +28,8 @@ class CalenderStrip extends React.Component {
       Highlight: false,
       selectedItem: null,
       isModalVisible: this.props.onPressGet,
+      Title:'',
+      note:''
     };
     this.MonthIndex = null;
     this.SelectedItemIndex = 0;
@@ -60,11 +38,11 @@ class CalenderStrip extends React.Component {
     this.CalenderDataFiltered = [];
     this.SelItemValue = {};
     this.getIndexotheScroll = this.getIndexotheScroll.bind(this);
-    // this.getfilteredData = this.getfilteredData.bind(this);
     this.DataProvider = this.DataProvider.bind(this);
     this.onItemPress = this.onItemPress.bind(this);
     this.getItemLayout = this.getItemLayout.bind(this);
     this.renderItem = this.renderItem.bind(this);
+    this.onHandleAddValue = this.onHandleAdd.bind(this);
   }
 
   componentDidMount() {
@@ -79,7 +57,7 @@ class CalenderStrip extends React.Component {
     var day = SelectedDate.day;
     var firstDay = new Date(year, month, 1).getDay();
     var firstDayfirstmonth = new Date(year, 1, 1).getDay();
-    var maxDays = this.nDays[month];
+    var maxDays = nDays[month];
     if (month == 1) {
       if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
         maxDays += 1;
@@ -87,29 +65,36 @@ class CalenderStrip extends React.Component {
     }
     const yrCalMonthwise = [];
     var WholeYr = [];
-    var Weekdays = firstDayfirstmonth;
+    var Weekdays = firstDayfirstmonth-3;
     for (var j = 0; j < 12; j++) {
       yrCalMonthwise[j] = [];
-      for (var i = 0; i < this.nDays[j]; i++) {
+      for (var i = 0; i < nDays[j]; i++) {
         yrCalMonthwise[j][i] = {};
-        yrCalMonthwise[j][i]['month'] = j;
-        yrCalMonthwise[j][i]['WeekDays'] = Weekdays % 7; //Math.abs(7-i)%7
         yrCalMonthwise[j][i]['date'] = i + 1;
+        yrCalMonthwise[j][i]['month'] = j;
+        yrCalMonthwise[j][i]['WeekDays'] = Weekdays % 7;
+        yrCalMonthwise[j][i]['year'] = year;
+        yrCalMonthwise[j][i]['Marked'] = false;
+        if(i+1<10&&j<10){
+          yrCalMonthwise[j][i]['dateString'] = `${year}-${'0'+j}-${'0'+i+1}`;
+        }
+        else if(i+1<10&&j>10){
+          yrCalMonthwise[j][i]['dateString'] = `${year}-${j}-${'0'+i+1}`;
+        }
+        else if(i+1>10&&j<10){
+          yrCalMonthwise[j][i]['dateString'] = `${year}-${'0'+j}-${i+1}`;
+        }
+        else{
+          yrCalMonthwise[j][i]['dateString'] = `${year}-${j}-${i+1}`;
+        }
         Weekdays++;
       }
     }
-    yrCalMonthwise.map(item => {
-      item.map(date => {
+    yrCalMonthwise.map(item => {item.map(date => {
         WholeYr.push(date);
       });
     });
-    this.setState(
-      {CalenderData: WholeYr, YrCalenderData: WholeYr.slice(0, 50)},
-      // () => {
-      //   this.scrollToIndex();
-      // },
-    );
-    //console.log("year,month,day,firstDay,firstDayfirstmonth,maxDays",WholeYr,year,month,day,firstDay,firstDayfirstmonth,maxDays,yrCalMonthwise)
+    this.setState({CalenderData: WholeYr, YrCalenderData: WholeYr.slice(0, 50)});
     return WholeYr;
   };
 
@@ -141,7 +126,7 @@ class CalenderStrip extends React.Component {
     let totalNumofDays = 0;
     let month = this.state.SelectedDate.month;
     let day = this.state.SelectedDate.day;
-    this.nDays.slice(0, month - 1).map(item => {
+    nDays.slice(0, month - 1).map(item => {
       totalNumofDays += item;
     });
     this.SelectedItemIndex = totalNumofDays + day;
@@ -211,32 +196,34 @@ class CalenderStrip extends React.Component {
   modalVisible = () => {
     this.setState({isModalVisible: false});
   };
-  onModalOpen = () => {
-    this.setState({isModalVisible: this.props.onPressGet});
-  };
 
-  componentDidUpdate() {
-    // this.setState({isModalVisible:true})
+  onHandleAdd=(onPressGet)=>{
+    const {MarkingData,note,Title,selectedItem,SelectedDate}=this.state
+    console.log('Selected Item',MarkingData)
+    if(note&&Title){
+      let data=  {
+        Date:selectedItem||SelectedDate,
+        Title:Title,
+        Note:note,
+      }
+      MarkingData.push(data)
+      this.setState({Title:'',note:''},
+      ()=>onPressGet(data)
+      )
+    }
+    else{
+      alert('Can not Save as Title or Location Blank ')
+    }
   }
-  render() {
-    const {
-      onItemPress,
-      solar,
-      marked,
-      highlight,
-      onPressGet,
-      ModelState,
-    } = this.props;
-    const {SelectedDate, Highlight, selectedItem, CalenderData} = this.state;
-    // console.log('SelectedDate', selectedItem);
 
-    // SelectedDay={year: 2020, month: 4, day: 8, timestamp: 1586304000000, dateString: "2020-04-08"}
+  render() {
+    const {onPressGet,ModelState} = this.props;
+    const {SelectedDate, selectedItem, CalenderData} = this.state;
     if (!this.isDefaultEnabled) {
       this.DefaultSelectedDate = this.state.CalenderData[
         this.SelectedItemIndex - 1
       ];
     }
-
     return (
       <View style={{top: -8}}>
         <FlatList
@@ -258,8 +245,8 @@ class CalenderStrip extends React.Component {
           <Text style={{fontSize: 16, fontWeight: '500'}}>
             {selectedItem ? selectedItem.date : SelectedDate.day}-
             {selectedItem
-              ? this.months[selectedItem.month]
-              : this.months[SelectedDate.month - 1]}
+              ? months[selectedItem.month]
+              : months[SelectedDate.month - 1]}
             -{SelectedDate.year}
           </Text>
         </View>
@@ -276,22 +263,7 @@ class CalenderStrip extends React.Component {
           <View style={Styles.centeredView}>
             <View style={Styles.modalView}>
               <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignContent: 'stretch',
-                  borderBottomColor: 'gray',
-                  borderBottomWidth: 0.2,
-                  elevation: 0.5,
-                  backgroundColor:"white",
-                  // shadowColor:"#c0c0c0",
-                  // shadowOffset:{
-                  //   height:2,width:0
-                  // },
-                  // shadowOpacity:0.8,
-                  alignItems: 'center',
-                  height: 45,
-                }}>
+                style={Styles.modalViewChild1}>
                 <View style={{marginLeft: 10}}>
                   <TouchableOpacity onPress={() => onPressGet()}>
                     <Text style={{color: 'rgba(242,55,5,1)', fontSize: 16}}>
@@ -305,7 +277,7 @@ class CalenderStrip extends React.Component {
                   </Text>
                 </View>
                 <View style={{marginRight: 10}}>
-                  <TouchableOpacity disabled={true}>
+                  <TouchableOpacity onPress={()=>this.onHandleAddValue(onPressGet)}>
                     <Text style={{color: 'rgba(242,55,5,1)', fontSize: 16}}>
                       Add
                     </Text>
@@ -315,25 +287,15 @@ class CalenderStrip extends React.Component {
                 <View style={{paddingHorizontal: 15, marginTop:20,backgroundColor:'white'}}>
                 <TextInput
                   placeholder="Title"
-                  style={{
-                    fontSize:16,
-                    borderBottomColor: 'gray',
-                    borderBottomWidth: 0.2,
-                    borderLeftWidth: 0,
-                    borderRightWidth: 0,
-                    borderTopWidth: 0,
-                  }}
+                  value={this.state.Title}
+                  onChangeText={(text=>this.setState({Title:text}))}
+                  style={Styles.TextInput}
                 />
                 <TextInput 
-                  placeholder="Location" 
-                  style={{
-                    fontSize:16,
-                    borderBottomColor: 'gray',
-                    borderBottomWidth: 0.2,
-                    borderLeftWidth: 0,
-                    borderRightWidth: 0,
-                    borderTopWidth: 0,
-                  }}
+                  placeholder="Notes" 
+                  value={this.state.note}
+                  onChangeText={(text=>this.setState({note:text}))}
+                  style={Styles.TextInput}
                   />
               </View>
             </View>
@@ -436,5 +398,29 @@ const Styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  TextInput:{
+    fontSize:16,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 0.2,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+  },
+  modalViewChild1:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignContent: 'stretch',
+    borderBottomColor: 'gray',
+    borderBottomWidth: 0.2,
+    elevation: 0.5,
+    backgroundColor:"white",
+    // shadowColor:"#c0c0c0",
+    // shadowOffset:{
+    //   height:2,width:0
+    // },
+    // shadowOpacity:0.8,
+    alignItems: 'center',
+    height: 45,
+  }
 });
 export default CalenderStrip;

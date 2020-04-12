@@ -40,7 +40,7 @@ class Screen2 extends Component {
     const {isCalendarView}=this.state
     return (
       <View style={{flex:1}}>    
-        <Header isToggle={this.toggleView} isWeekShow={true} Headertext="Calendar" />
+        <Header isToggle={()=>this.toggleView()} isWeekShow={true} Headertext="Calendar" />
         <View>
           {!isCalendarView?
           <Calendar 
@@ -51,11 +51,9 @@ class Screen2 extends Component {
               [this.state.onSelectDate]: {selected: true, selectedColor: 'black'},
             }}
             onDayPress={(day)=>{
-            this.setState({onSelectDate:day.dateString})
-            setTimeout(() => {
-              this.props.navigation.navigate("Screen3",{SelectedDay:day})
-              this.setState({onSelectDate:''})
-            }, 10);
+              this.setState({onSelectDate:day.dateString})
+              this.props.navigation.navigate("Screen3",{SelectedDay:day},()=>this.setState({onSelectDate:''})
+              )
             }
             
             }

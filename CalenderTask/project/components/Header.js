@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const {width, height} = Dimensions.get('window');
 const Months=[
@@ -88,7 +89,7 @@ class Header extends Component {
               </TouchableOpacity>
             )}
 { isSearchVisible?          
-           <TouchableOpacity>
+           <TouchableOpacity onPress={()=>{try{AsyncStorage.clear()}catch(e){}}}>
               <AntDesign
                 name="search1"
                 color={orange}
