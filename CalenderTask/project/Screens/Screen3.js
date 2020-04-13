@@ -1,14 +1,13 @@
 import React, {Component} from 'react';
-import {View, Text, SectionList, Alert} from 'react-native';
+import {View, Text,Alert, StyleSheet} from 'react-native';
+import {FlatList, TouchableOpacity} from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import Header from '../components/Header';
 import DaysList from '../components/Day';
-import {FlatList, ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
-import {DummyData,constant} from '../DataManager/DataModals';
-const {nDays,months,weekDays}=constant;
-import AsyncStorage from '@react-native-community/async-storage';
+import {constant} from '../DataManager/DataModals';
 
-
+const {months,weekDays}=constant;
 
 class Screen3 extends Component {
   constructor(props) {
@@ -22,7 +21,7 @@ class Screen3 extends Component {
     };
     this.handleHeaderValueChangte = this.handleHeaderValueChangte.bind(this);
     this.handlePlusClick = this.handlePlusClick.bind(this);
-    this.renderListf = this.renderList.bind(this);
+    this.renderList = this.renderList.bind(this);
   }
 
   handleHeaderValueChangte = Num => {
@@ -30,49 +29,42 @@ class Screen3 extends Component {
   };
 
  async componentDidMount(){
-    await AsyncStorage.getItem("TEST")
-      .then((D)=>{
-        let data=JSON.parse(D)
+  try {
+    const value = await AsyncStorage.getItem("TEST")
+    if(value !== null) {
+      let data=JSON.parse(value)
         this.setState({EventData:data})
-      })
-      .catch((e)=>console.log(e))
-  }
-
-   saveDatatotheAsyncStore=async()=>{
-    if(this.state.EventData.length>0){
-      try{
-          let Data=JSON.stringify(this.state.EventData)
-          await AsyncStorage.setItem("TEST",`${Data}`).then((data)=>console.log("Data has been Successfully Changed")).catch((e)=>console.log('Found the error in the Saving data',e))
-      }
-      catch(e){
-        console.log(e)
-      }
     }
+  } catch(e) {console.log(e)}
+}
 
+saveDatatotheAsyncStore=async()=>{
+if(this.state.EventData.length>0){
+  try{let Data=JSON.stringify(this.state.EventData)
+      await AsyncStorage.setItem("TEST",`${Data}`).then((data)=>console.log("Data has been Successfully Changed")).catch((e)=>console.log('Found the error in the Saving data',e))}
+  catch(e){console.log(e)}}}
+
+handlePlusClick = (Val) => {
+  console.log('VAL',Val)
+  if(Val){
+    this.setState({EventData:this.state.EventData.concat(Val)},()=>{this.saveDatatotheAsyncStore()})
   }
-
-  handlePlusClick = (Val) => {
-    console.log('VAL',Val)
-    if(Val){
-      this.setState({EventData:this.state.EventData.concat(Val)},()=>{this.saveDatatotheAsyncStore()})
-    }
-    this.setState({ClickedModalPlus: !this.state.ClickedModalPlus});
-    
-  };
-
+  this.setState({ClickedModalPlus: !this.state.ClickedModalPlus});
+  
+};
   
  renderList=()=>{
+
    const {SeleactedDay,EventData}=this.state
    var selectedWeekDay = new Date( SeleactedDay.year, SeleactedDay.month, SeleactedDay.day).getDay();
-  //   console.log('SeleactedDay',SeleactedDay)
-   console.log('called renderList',EventData)
+   console.log('called Event',EventData)
    if(EventData.length>0){
      return(
        <FlatList 
-       style={{top:80}}
         data={EventData}
-        keyExtractor={(item)=>{item-`${item}`}}
+        keyExtractor={(item)=>{item.date||item.Date.date-`${item}`}}
         renderItem={({item,index})=>{
+          console.log(item)
             return(  
             <TouchableOpacity onPress={()=>Alert.alert('Event Action','What you wanna do?',
             [{text: "Delete", onPress: () => {
@@ -83,32 +75,14 @@ class Screen3 extends Component {
               {text: "Cancel", onPress: () => console.log("Canceled Pressed")}])}>
               <View>
              <View>
-               <Text
-                 style={{
-                   fontWeight: 'bold',
-                   fontSize: 18,
-                   paddingLeft: 8,
-                 }}>
-                   {weekDays[item.Date.WeekDays?item.Date.WeekDays:selectedWeekDay]}, 
-                   {months[item.Date.month?item.Date.month:SeleactedDay.month]},
-                   {item.Date.date?item.Date.date:item.date}
+               <Text style={Styles.Headertext}>
+                   {weekDays[item.Date.WeekDays?item.Date.WeekDays:selectedWeekDay]},{months[item.Date.month?item.Date.month:SeleactedDay.month]}, {item.Date.date?item.Date.date:item.Date.day}
                </Text>
              </View>
              <View
-               style={{
-                 flexDirection: 'row',
-                 backgroundColor: 'white',
-                 flex: 1,
-                 height: 45,
-                 paddingVertical: 2,
-                 alignItems: 'center',
-               }}>
+               style={Styles.EvenDataWrapper}>
                <View
-                 style={{
-                   flex: 0.2,
-                   borderLeftColor: 'purple',
-                   borderRightWidth: 1,
-                 }}>
+                 style={Styles.DataWrapperEvent}>
                  <Text style={{padding: 8}}>All-day</Text>
                </View>
                <View style={{flex: 0.8, padding: 8}}>
@@ -119,23 +93,12 @@ class Screen3 extends Component {
            </View>
            </TouchableOpacity>
            )
-          }}
-
-          />       
-     )
-   }
-   else{
-     return ;
-   }
+          }}/>)}
+   else{return ;}
   }       
- 
-    
 
   render() {
     const {SelectedDay} = this.props.route.params;
-    const {EventData}=this.state
-    // console.log('from the house of Screen',this.state.EventData)
-    var selectedDay = new Date( SelectedDay.year, SelectedDay.month, SelectedDay.day).getDay();
     // SelectedDay={year: 2020, month: 4, day: 8, timestamp: 1586304000000, dateString: "2020-04-08"}
     return (
       <View>
@@ -149,20 +112,7 @@ class Screen3 extends Component {
           PlusOnPress={this.handlePlusClick}
         />
         <View
-          style={{
-            position: 'absolute',
-            elevation: 4,
-            top: 40,
-            elevation: 4,
-            backgroundColor: '#f0f0f0',
-            shadowColor: 'gray',
-            shadowOffset: {
-              width: 0,
-              height: 5,
-            },
-            height: 100,
-            shadowOpacity: 0.5,
-          }}>
+          style={Styles.DataListWrapper}>
           <DaysList
             SelectedDate={SelectedDay}
             MonthValue={this.handleHeaderValueChangte}
@@ -170,14 +120,45 @@ class Screen3 extends Component {
             onPressGet={this.handlePlusClick}
           />
         </View>
-        {/* <View style={{top: 80, flex}}> */}
-          {/* <ScrollView style={{}}> */}
             {this.renderList()}
-          {/* </ScrollView> */}
-        {/* </View> */}
-      </View>
+        </View>
     );
   }
 }
+
+const Styles=StyleSheet.create({
+  EvenDataWrapper:{
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    flex: 1,
+    height: 45,
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  Headertext:{
+    fontWeight: 'bold',
+    fontSize: 18,
+    paddingLeft: 8,
+  },
+  DataWrapperEvent:{
+    flex: 0.2,
+    borderLeftColor: 'purple',
+    borderRightWidth: 1,
+  },
+  DataWrapper:{
+    position: 'absolute',
+    elevation: 4,
+    top: 40,
+    elevation: 4,
+    backgroundColor: '#f0f0f0',
+    shadowColor: 'gray',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    height: 100,
+    shadowOpacity: 0.5,
+  }
+})
 
 export default Screen3;

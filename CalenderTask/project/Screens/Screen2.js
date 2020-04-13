@@ -1,26 +1,8 @@
 import React, {Component} from 'react';
-import {View, Text, FlatList, Dimensions, ScrollView} from 'react-native';
+import {View} from 'react-native';
 import Header from '../components/Header';
 
-import Calender from '../components/Calender';
-
-const {height, width} = Dimensions.get('window');
-
-import {
-  Agenda,
-  AgendaItemsMap,
-  AgendaProps,
-  AgendaThemeStyle,
-  CalendarList,
-  ExpandableCalendar,
-  Calendar
-} from 'react-native-calendars';
-import moment from 'moment';
-
-const months=moment.months()
-
-const Calender_Height = height - 70;
-const Calender_Width = width - 70;
+import {CalendarList,Calendar} from 'react-native-calendars';
 
 class Screen2 extends Component {
   constructor(props) {
@@ -53,16 +35,11 @@ class Screen2 extends Component {
             onDayPress={(day)=>{
               this.setState({onSelectDate:day.dateString})
               this.props.navigation.navigate("Screen3",{SelectedDay:day},()=>this.setState({onSelectDate:''})
-              )
-            }
-            
-            }
+              )}}
             />:
-            <CalendarList
-            onDayPress={(day)=>{
-             this.props.navigation.navigate("Screen3", {SelectedDay:day})
-            }}
-            />}
+            <CalendarList onDayPress={(day)=>{
+              this.props.navigation.navigate("Screen3", {SelectedDay:day})
+            }}/>}
         </View>
       </View>
     );
