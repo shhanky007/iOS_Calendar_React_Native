@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text,Alert, StyleSheet} from 'react-native';
+import {View, Text,Alert, StyleSheet,Switch} from 'react-native';
 import {FlatList, TouchableOpacity} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -14,6 +14,7 @@ class Screen3 extends Component {
     super(props);
     this.state = {
       rerender:false,
+      Switch:false,
       MonthValue: this.props.route.params.SelectedDay.month,
       SeleactedDay: this.props.route.params.SelectedDay,
       ClickedModalPlus: false,
@@ -111,14 +112,26 @@ handlePlusClick = (Val) => {
           heightPerc={0.2}
           PlusOnPress={this.handlePlusClick}
         />
-        <View
-          style={Styles.DataListWrapper}>
+        <View style={Styles.DataListWrapper}>
           <DaysList
             SelectedDate={SelectedDay}
             MonthValue={this.handleHeaderValueChangte}
             ModelState={this.state.ClickedModalPlus}
             onPressGet={this.handlePlusClick}
           />
+        </View>
+        <View style={{flexDirection:"row",marginTop:75,justifyContent:"space-between",backgroundColor:"white",}}>
+            {this.state.Switch ?
+            <Text style={{color:'rgba(242,55,5,1)',fontSize:18,marginLeft:3,fontWeight:"700"}}> See Day Wise</Text>
+            :<Text  style={{color:'rgba(242,55,5,1)',fontSize:18,marginLeft:3,fontWeight:"700"}}> See Day Wise</Text>}
+            <Switch 
+              
+              style={{elevation:2}}
+              trackColor={{ false: "#767577", true: 'rgba(242,55,5,1)' }}
+              thumbColor="rgba(242,55,5,1)"
+              value={this.state.Switch}
+              onValueChange={()=>this.setState({Switch:!this.state.Switch})}
+            />
         </View>
             {this.renderList()}
         </View>
@@ -145,7 +158,7 @@ const Styles=StyleSheet.create({
     borderLeftColor: 'purple',
     borderRightWidth: 1,
   },
-  DataWrapper:{
+  DataListWrapper:{
     position: 'absolute',
     elevation: 4,
     top: 40,

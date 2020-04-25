@@ -225,7 +225,7 @@ class CalenderStrip extends React.Component {
       ];
     }
     return (
-      <View style={{top: -8}}>
+      <View style={{}}>
         <FlatList
           getItemLayout={this.getItemLayout}
           initialScrollIndex={this.SelectedItemIndex - 3}
@@ -362,7 +362,7 @@ const Styles = StyleSheet.create({
     // borderBottomColor: 'rgba(100,100,100,0.1)',
   },
   centeredView: {
-    position: 'absolute',
+    // position: 'absolute',
     flex: 1,
     alignContent: 'center',
     opacity: 1,
